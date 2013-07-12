@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 set -e 
 
 #cleaning 
@@ -14,7 +15,12 @@ cat start.js Matrix.js Vector.js algo/MatrixMultiplication.js end.js > ../build/
 cat ../build/oxymath.dev.js | ../node_modules/uglify-js/bin/uglifyjs -o ../oxymath.min.js
 cd ..
 
-#creating documentation
+#creating documentation with YUIDOC
 echo 'Creating documentation...'
 yuidoc -t ./docs/simple -o ./docs/yuidoc ./build
 
+
+if [ -f ./build/local.sh ];
+then
+./build/local.sh
+fi
