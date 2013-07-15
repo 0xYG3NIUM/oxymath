@@ -31,8 +31,7 @@
 	 * @class Oxymath
 	 * @constructor
 	 */
-	function Oxymath() {}; 
-	
+	function Oxymath() {};	
 	
 	/*
 	* Internal parent object of the library
@@ -40,6 +39,18 @@
 	*/
 	function _Oxymath(){
 	};
+	
+	
+	/*
+	* This function is used to create objects without calling 'new' operator
+	*/
+	var create = _Oxymath.prototype.create = function(constructor_function, args){
+		function f(){
+			return constructor_function.apply(this,args);
+		};
+		f.prototype = constructor_function.prototype;
+		return new f();
+	}
 	
 	
 	/**

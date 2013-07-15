@@ -1,6 +1,7 @@
 /**
 * Vector is a subclass of the Matrix and essentially is a matrix of size m x 1
 * @class Vector
+* @extends Matrix
 */	
 var Vector = Oxymath.Vector = Matrix.subClass({
 		/**
@@ -24,7 +25,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 					
 					this.parent(vector.length, 1);
 					this.forEach(function(val,m){
-						return vector[m-1];
+						this.set(m,vector[m-1]);
 					});
 					return;  
 				};

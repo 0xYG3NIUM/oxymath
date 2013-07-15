@@ -96,7 +96,13 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		forEach:function(fn){
 			for(var m=0;m<this.size.m;m++)
 				for (var n=0;n<this.size.n;n++)
-					this._private._storage[m][n] = fn.call(this,this._private._storage[m][n],m+1,n+1);
+					//this._private._storage[m][n] = 
+					try {
+						fn.call(this,this._private._storage[m][n],m+1,n+1); 
+					} catch(stop_execution){
+						if(stop_execution)
+							break;
+					}	
 			return this;
 		},
 		
@@ -111,6 +117,40 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		get: function(index_m, index_n){
 			return this._private._storage[index_m-1][index_n-1];
 		},
+		
+		/**
+		* Checks if parameter-matrix has the same values as the current one
+		* @method isEqual
+		* @param {Matrix} matrix Matrix to compare to
+		* @return {Boolean} Boolean
+		*/
+		isEqual: function(matrix){
+			if(!(matrix instanceof Matrix) || !this.isSameSize(matrix))
+				return false;
+			
+			var equal = true;
+			this.forEach(function(val,m,n){
+				if(this.get(m,n)!=matrix(m,n)){
+					equal = false;
+					throw true;	
+				}
+			});
+			
+			return equal;
+		},
+		
+		/**
+		* Checks if parameter-matrix is the same size as the current one
+		* @method isSameSize
+		* @param {Matrix} matrix Matrix to compare size to
+		* @return {Boolean} Boolean
+		*/
+		isSameSize: function(matrix){
+			if(matrix instanceof Matrix)
+				return this.size.m === matrix.size.m && this.size.n === matrix.size.n;
+			else return false;
+		},
+		
 		
 		/**
 		* Subtracts parameter-matrix from the matrix and returns result as new matrix instance
@@ -137,20 +177,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			return C.unsafePlus(B);						
 				
 		},
-		
-		/**
-		* Checks if parameter-matrix is the same size as the current one
-		* @method isSameSize
-		* @param {Matrix} matrix Matrix to compare size to
-		* @return {Boolean} Boolean
-		*/
-		
-		isSameSize: function(matrix){
-			if(matrix instanceof Matrix)
-				return this.size.m === matrix.size.m && this.size.n === matrix.size.m;
-			else return false;
-		},
-		
+
 		/**
 		* Sets the matrix element to the specified value
 		* @method set
@@ -159,7 +186,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		* @param value New value for the element
 		*/
 		set: function(index_m, index_n, value){
-			this._private._storage[index_m][index_n] = value;
+			this._private._storage[index_m-1][index_n-1] = value;
 		},
 		
 		
@@ -172,7 +199,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		times: function(multiplier){
 			var A = this;
 			if(typeof multiplier === "number")
-				return (new Matrix(this.size.m,this.size.n)).forEach(function(value,m,n){return multiplier*A.get(m,n);});
+				return (new Matrix(this.size.m,this.size.n)).forEach(function(value,m,n){this.set(m,n,multiplier*A.get(m,n));});
 				
 			if(multiplier instanceof Matrix){
 				return naiveMatrixMultiplication(A,multiplier);
@@ -187,7 +214,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		*/
 		transpose: function(){
 			var A=this;
-			return (new Matrix(this.size.n,this.size.m)).forEach(function(value,m,n){return A.get(n,m);});
+			return (new Matrix(this.size.n,this.size.m)).forEach(function(value,m,n){this.set(m,n,A.get(n,m));});
 		},
 		
 		/**
@@ -203,7 +230,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			};
 			
 			return A.forEach(function(val,m,n){
-				return val-B.get(m,n); 
+				this.set(m,n,val-B.get(m,n)); 
 			});
 			return A;
 		},
@@ -221,7 +248,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			};
 			
 			return A.forEach(function(val,m,n){
-				return val+B.get(m,n); 
+				this.set(m,n,val+B.get(m,n)); 
 			});
 			return A;
 		}
@@ -231,11 +258,12 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 /**
 * Identity matrix constructor implementation
 * @class Identity
+* @extends Matrix
 */	
 var Identity = Oxymath.Identity = Matrix.subClass({
 	
 	/**
-	* Identity matrix constructor. Creates a matrix mxm
+	* Identity matrix constructor. Creates an identity matrix of size MxM
 	* @constructor
 	* @method Identity 	
 	* @param {number} m Matrix size
@@ -246,7 +274,7 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 			if(m>0){
 				this.parent(m,m);
 				this.forEach(function(val,m,n){
-					return m===n?1:0;
+					this.set(m,n,m===n?1:0);
 				});	
 			}else this.error("Error initializing identity matrix",m);
 		};

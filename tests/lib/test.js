@@ -1,3 +1,28 @@
+
+(function(){
+
+	var results;
+	var test_container = document.createElement('ul');
+	document.body.appendChild(test_container);
+	
+	this.test = function test(condition, test_description){
+		var li = document.createElement('li');
+		li.style.color = condition ? 'green' : 'red';
+		li.appendChild(document.createTextNode(test_description))
+		results.appendChild(li);
+		if(!condition)
+			li.parentNode.parentNode.style.color='red';
+		return li;	
+	};
+	
+	this.testSection = function testSection(description,fn){
+		results = test_container;
+		results = test(true, description).appendChild(document.createElement('ul'));
+		fn();
+	};	
+
+})();
+
 function print(obj){
 	if(arguments.length>1){
 		for(var i=0; i<arguments.length; i++)
@@ -35,7 +60,5 @@ function print(obj){
 		console.log(obj);	
 	}
 
-}
-
-
+};
 

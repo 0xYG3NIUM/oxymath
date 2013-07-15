@@ -17,7 +17,7 @@ function naiveMatrixMultiplication(A,B){
 		var sum = 0;
 		for(var i=1; i<=A.size.n;i++)
 			sum+= A.get(m,i)*B.get(i,n);
-		return sum;
+		this.set(m,n,sum);
 	});
 
 };
