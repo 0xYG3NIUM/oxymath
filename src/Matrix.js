@@ -3,17 +3,14 @@
 * @class Matrix
 */	
 var Matrix = Oxymath.Matrix = _Oxymath.subClass({
-	
-					
+						
 		/** 
 		* Constructor of the Matrix class. There are several ways for creating a matrix:
 		* 1: new Matrix(instance_of_another_matrix)
 		* 2: new Matrix([[1,2,3],[1,2,3]]);
 		* 3: new Matrix(size_m,size_n, <optional_initial_value>)
 		* @method Matrix
-		*/ 
-		
-		
+		*/ 		
 		init: function(){
 				if(!this._private._initialized){
 					
@@ -27,9 +24,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 					
 					
 					var storage = this._private._storage = storage=storage?storage:[]; //Initializing storage
-					
-					
-					
+								
 					//Overloading constructor
 					//Initializing from array or matrix
 					this.overload("init", function(arr){
@@ -151,7 +146,6 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			else return false;
 		},
 		
-		
 		/**
 		* Subtracts parameter-matrix from the matrix and returns result as new matrix instance
 		* @method minus
@@ -163,7 +157,6 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			var C = new Matrix(A);
 			return C.unsafeMinus(B);		
 		},
-		
 		
 		/**
 		* Adds a matrix to the current one and returns the result as a new instance of Matrix
@@ -188,8 +181,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		set: function(index_m, index_n, value){
 			this._private._storage[index_m-1][index_n-1] = value;
 		},
-		
-		
+				
 		/**
 		* Multiplies current matrix by specified in parameter one. 
 		* @method times

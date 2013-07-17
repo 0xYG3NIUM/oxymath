@@ -53,14 +53,14 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 				return this.error("Vector dot product error: Vectors have different size");
 			var product = 0;
 			
-			for(var m=1;m<=A.length();m++)
+			for(var m=1;m<=A.size();m++)
 				product+=A.get(m)*B.get(m);
 			
 			return product;
 			
 		},
 		
-		
+
 		/**
 		* Retrievs the value of the particular vector element
 		* @method get
@@ -80,18 +80,8 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		*/
 		isSameSize: function(vector){
 			if(vector instanceof Vector)
-				return this.length() === vector.length();
+				return this.size() === vector.size();
 			else return false;
-		},
-				
-		
-		/**
-		* Return the length of the vector
-		* @method length
-		* @return {number} Length of the vector
-		*/
-		length: function(){
-			return this.size.m;
 		},
 		
 		
@@ -105,6 +95,20 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 			var A = this;				
 			var C = new Vector(A);
 			return C.unsafeMinus(B);		
+		},
+		
+		/** Returns norm of the vector (i.e. magnitude or length)
+		* @method norm
+		* @return {number} norm of the vector
+		*/
+		norm: function(){
+			var len = 0;
+			
+			this.forEach(function(val,m){
+				len+=this.get(m)*this.get(m);
+			});
+			
+			return Math.sqrt(len);
 		},
 		
 		/**
@@ -129,6 +133,15 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		*/
 		set: function (index_m, value){
 			return this.parent(index_m,1,value);
+		},
+		
+		/**
+		* Return the number of elements in the vector
+		* @method size
+		* @return {number} number of elements in the vector
+		*/
+		size: function(){
+			return this.size.m;
 		}
 	
 	});

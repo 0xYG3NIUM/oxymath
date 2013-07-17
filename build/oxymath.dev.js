@@ -142,17 +142,14 @@
 * @class Matrix
 */	
 var Matrix = Oxymath.Matrix = _Oxymath.subClass({
-	
-					
+						
 		/** 
 		* Constructor of the Matrix class. There are several ways for creating a matrix:
 		* 1: new Matrix(instance_of_another_matrix)
 		* 2: new Matrix([[1,2,3],[1,2,3]]);
 		* 3: new Matrix(size_m,size_n, <optional_initial_value>)
 		* @method Matrix
-		*/ 
-		
-		
+		*/ 		
 		init: function(){
 				if(!this._private._initialized){
 					
@@ -166,9 +163,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 					
 					
 					var storage = this._private._storage = storage=storage?storage:[]; //Initializing storage
-					
-					
-					
+								
 					//Overloading constructor
 					//Initializing from array or matrix
 					this.overload("init", function(arr){
@@ -290,7 +285,6 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			else return false;
 		},
 		
-		
 		/**
 		* Subtracts parameter-matrix from the matrix and returns result as new matrix instance
 		* @method minus
@@ -302,7 +296,6 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			var C = new Matrix(A);
 			return C.unsafeMinus(B);		
 		},
-		
 		
 		/**
 		* Adds a matrix to the current one and returns the result as a new instance of Matrix
@@ -327,8 +320,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		set: function(index_m, index_n, value){
 			this._private._storage[index_m-1][index_n-1] = value;
 		},
-		
-		
+				
 		/**
 		* Multiplies current matrix by specified in parameter one. 
 		* @method times
@@ -475,14 +467,14 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 				return this.error("Vector dot product error: Vectors have different size");
 			var product = 0;
 			
-			for(var m=1;m<=A.length();m++)
+			for(var m=1;m<=A.size();m++)
 				product+=A.get(m)*B.get(m);
 			
 			return product;
 			
 		},
 		
-		
+
 		/**
 		* Retrievs the value of the particular vector element
 		* @method get
@@ -502,18 +494,8 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		*/
 		isSameSize: function(vector){
 			if(vector instanceof Vector)
-				return this.length() === vector.length();
+				return this.size() === vector.size();
 			else return false;
-		},
-				
-		
-		/**
-		* Return the length of the vector
-		* @method length
-		* @return {number} Length of the vector
-		*/
-		length: function(){
-			return this.size.m;
 		},
 		
 		
@@ -527,6 +509,20 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 			var A = this;				
 			var C = new Vector(A);
 			return C.unsafeMinus(B);		
+		},
+		
+		/** Returns norm of the vector (i.e. magnitude or length)
+		* @method norm
+		* @return {number} norm of the vector
+		*/
+		norm: function(){
+			var len = 0;
+			
+			this.forEach(function(val,m){
+				len+=this.get(m)*this.get(m);
+			});
+			
+			return Math.sqrt(len);
 		},
 		
 		/**
@@ -551,6 +547,15 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		*/
 		set: function (index_m, value){
 			return this.parent(index_m,1,value);
+		},
+		
+		/**
+		* Return the number of elements in the vector
+		* @method size
+		* @return {number} number of elements in the vector
+		*/
+		size: function(){
+			return this.size.m;
 		}
 	
 	});
