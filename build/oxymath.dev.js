@@ -171,8 +171,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 						//if arr is a matrix then copy from there
 						if(arr instanceof Matrix){
 							this.init(arr.size.m,arr.size.n);
-							this.forEach(function(val,m,n){
-								return arr.get(m,n);
+							this.forEach(function(m,n){
+								this.set(m,n, arr.get(m,n));
 							});
 							return;								
 						}
@@ -220,26 +220,66 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			
 		},
 		
+		/** Calculates determinant of the matrix
+		* @mathod det
+		* @return {number} Determinant value
+		*/
+		det:function(){
+			var lu_dec = this.lu();
+			var det = 1;
+			for( var i = 1; i <= this.size.m;i++)
+				det = det*lu_dec.L.get(i,i);
+			return det*lu_dec.signum;
+		},	
 		
 		/**
-		* Sets new value for the each matrix element equal to the value that parameter function returns
+		* Exchanges rows of the matrix
+		* @method exchangeRows
+		* @param {number} i Row number
+		* @param {number} j Row number
+		* @return {Object} Reference to the current matrix
+		*/
+		exchangeRows:function(i,j){
+			if(i>this.size.m || j>this.size.m || i<1 || j<1)
+				return error("Wrong indices during the row exchange");
+			var tmp = this._private._storage[i-1];
+			this._private._storage[i-1]=this._private._storage[j-1];
+			this._private._storage[j-1]=tmp;
+			
+			return this;
+		}, 
+		
+		/**
+		* Executes function on each matrix element and passing indices as params
 		* @method forEach
-		* @param {function} fn Expects function as follows function(value, index_m, index_n){return new_value};
+		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
 		* @return {Object} Reference to the matrix
 		*/
 		forEach:function(fn){
 			for(var m=0;m<this.size.m;m++)
-				for (var n=0;n<this.size.n;n++)
-					//this._private._storage[m][n] = 
-					try {
-						fn.call(this,this._private._storage[m][n],m+1,n+1); 
-					} catch(stop_execution){
-						if(stop_execution)
-							break;
-					}	
+				this.forEachInRow(m+1,fn)				
 			return this;
 		},
 		
+		/**
+		* Executes function on each row element and passing index as a param
+		* @method forEach
+		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
+		* @return {Object} Reference to the matrix
+		*/
+		forEachInRow: function(row_number, fn){
+			
+			for (var n=0;n<this.size.n;n++)
+				//this._private._storage[m][n] = 
+				try {
+					fn.call(this,row_number,n+1); 
+				} catch(stop_execution){
+					if(stop_execution)
+						break;
+				}	
+				
+			return this;
+		},
 		
 		/**
 		* Retrievs the value of the particular matrix element
@@ -253,6 +293,15 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		},
 		
 		/**
+		* Inverse of the matrix
+		* @method inv
+		* @return Inverse of the matrix
+		*/
+		inv:function(){
+			return inverse(this);
+		},
+		
+		/**
 		* Checks if parameter-matrix has the same values as the current one
 		* @method isEqual
 		* @param {Matrix} matrix Matrix to compare to
@@ -263,7 +312,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return false;
 			
 			var equal = true;
-			this.forEach(function(val,m,n){
+			this.forEach(function(m,n){
 				if(this.get(m,n)!=matrix(m,n)){
 					equal = false;
 					throw true;	
@@ -283,6 +332,19 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			if(matrix instanceof Matrix)
 				return this.size.m === matrix.size.m && this.size.n === matrix.size.n;
 			else return false;
+		},
+		
+		/**
+		* PA = LU Decomosition. Returns object with the next members
+		* P Permutation matrix
+		* L Lower triangular
+		* U Upper triangular
+		* signum - It has the value (-1)^n, where n is the number of interchanges in the permutation.
+		* @method lu
+		* @return {Matrix} object containing L,U and P matrices;
+		*/
+		lu:function(){
+			return luCrout(this);
 		},
 		
 		/**
@@ -316,9 +378,12 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		* @param {numeric} index_m m index
 		* @param {numeric} index_n n index
 		* @param value New value for the element
+		* @return {Object} Reference to the matrix
 		*/
 		set: function(index_m, index_n, value){
 			this._private._storage[index_m-1][index_n-1] = value;
+			
+			return this;
 		},
 				
 		/**
@@ -330,7 +395,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		times: function(multiplier){
 			var A = this;
 			if(typeof multiplier === "number")
-				return (new Matrix(this.size.m,this.size.n)).forEach(function(value,m,n){this.set(m,n,multiplier*A.get(m,n));});
+				return (new Matrix(this.size.m,this.size.n)).forEach(function(m,n){this.set(m,n,multiplier*A.get(m,n));});
 				
 			if(multiplier instanceof Matrix){
 				return naiveMatrixMultiplication(A,multiplier);
@@ -345,7 +410,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		*/
 		transpose: function(){
 			var A=this;
-			return (new Matrix(this.size.n,this.size.m)).forEach(function(value,m,n){this.set(m,n,A.get(n,m));});
+			return (new Matrix(this.size.n,this.size.m)).forEach(function(m,n){this.set(m,n,A.get(n,m));});
 		},
 		
 		/**
@@ -360,8 +425,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return this.error("Matrix subtraction error: Matrices have different size");
 			};
 			
-			return A.forEach(function(val,m,n){
-				this.set(m,n,val-B.get(m,n)); 
+			return A.forEach(function(m,n){
+				this.set(m,n,A.get(m,n)-B.get(m,n)); 
 			});
 			return A;
 		},
@@ -378,8 +443,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return this.error("Matrix addition error: Matrices have different size");
 			};
 			
-			return A.forEach(function(val,m,n){
-				this.set(m,n,val+B.get(m,n)); 
+			return A.forEach(function(m,n){
+				this.set(m,n,A.get(m,n)+B.get(m,n)); 
 			});
 			return A;
 		}
@@ -404,7 +469,7 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 		if(!this._private._initialized){
 			if(m>0){
 				this.parent(m,m);
-				this.forEach(function(val,m,n){
+				this.forEach(function(m,n){
 					this.set(m,n,m===n?1:0);
 				});	
 			}else this.error("Error initializing identity matrix",m);
@@ -438,7 +503,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 				if((vector instanceof Array) && vector.length){ //initializing from an array
 					
 					this.parent(vector.length, 1);
-					this.forEach(function(val,m){
+					this.forEach(function(m){
 						this.set(m,vector[m-1]);
 					});
 					return;  
@@ -518,7 +583,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		norm: function(){
 			var len = 0;
 			
-			this.forEach(function(val,m){
+			this.forEach(function(m){
 				len+=this.get(m)*this.get(m);
 			});
 			
@@ -570,19 +635,143 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 */
 function naiveMatrixMultiplication(A,B){
 	if(!(A instanceof Matrix) || !(B instanceof Matrix))
-		error("Only matrices can be multiplied");
+		error("Only matrices or Vectors can be multiplied");
 	if(A.size.n !== B.size.m)
 		error("Multiplication error: Matrices size mismatch");
 	
-	return (new Matrix(A.size.m, B.size.n)).forEach(function(value,m,n){
+	var C = B instanceof Vector ? new Vector(A.size.m) : new Matrix(A.size.m, B.size.n)
+	
+	return C.forEach(function(m,n){
 		var sum = 0;
 		for(var i=1; i<=A.size.n;i++)
 			sum+= A.get(m,i)*B.get(i,n);
-		this.set(m,n,sum);
+		C instanceof Vector ? this.set(m,sum) : this.set(m,n,sum);
 	});
 
 };
-Oxymath.createMatrix = function(){return create(Matrix, arguments);};
+//This decomposition is a Crout's imlementation
+
+
+
+function luCrout(A){
+
+	if(!(A instanceof Matrix))
+		return error("Only matrices can be decomposed");
+	if(A.size.n !== A.size.m)
+		return error("Decomposition error: Matrix must be square");
+	
+	var size = A.size.n
+	
+	
+	P = new Identity(size);
+	L = new Identity(size);
+	U = new Matrix(A);
+	signum=1; //(-1)^n where n - number of permutations
+	
+	for(var i = 1; i <= size; i++){
+	
+		if(U.get(i,i) == 0){ //trying to do row exchange if 0 is in the pivot position
+		
+			var max_index=i;
+			
+			for(var j=i; j<=size;j++)
+				if(U.get(j,i)>U.get(max_index,i))
+					max_index=j;
+			
+			if(U.get(max_index,i) != 0){
+				U.exchangeRows(i,max_index);
+				P.exchangeRows(i,max_index);
+				signum = signum * -1;
+			}else return error("Decomposition error: Matrix is singular");
+			
+		}
+		
+		//Reducing pivot to 1
+		if( U.get(i,i) != 1 ){ // we need reduction in order to achive RREF
+			L.set(i,i,U.get(i,i)); 
+			U.forEachInRow(i,function(m,n){this.set(m,n,this.get(m,n)/L.get(i,i));});	
+		};
+		
+		if( i != size) //nothing to do in the case of last roww
+			for(var j=i+1; j<=size;j++){
+				var pivot = U.get(j,i);
+				L.set(j,i,pivot);
+				U.forEachInRow(j,function(m,n){this.set(m,n,this.get(m,n)-pivot*this.get(i,n));});
+			}
+	}
+	
+	return {
+		A:A,
+		P:P,
+		U:U,
+		L:L,
+		signum:signum
+	};
+
+}//Back substitution when the input is in form UX=B 
+//returns matrix X
+
+function backSubstitution(U,B){
+	if(!(U instanceof Matrix) || !(B instanceof Matrix))
+		return error("BackSubstitution Error: Expecting 2 matrices");
+	if(U.size.n!=B.size.m)
+		return error("BackSubstitution Error: B and U size mismatch");
+	
+	
+	var X = new Matrix(B.size.m,B.size.n,0);
+	
+	for(var j = 1; j<=B.size.n; j++){
+		//for Each in row of B
+		for(var i = B.size.m; i>= 1; i--){
+			//for each in column of B
+			X.set(i,j,B.get(i,j));
+			for(var k = i+1; k<=B.size.m;k++)
+				X.set(i,j,X.get(i,j)-U.get(i,k)*X.get(k,j));
+			X.set(i,j,X.get(i,j)/U.get(i,i));
+		}
+			
+	}
+	
+	return X;
+
+}
+
+
+//Back substitution when the input is in form LX=B 
+//returns matrix X
+function forwardSubstitution(L,B){
+	if(!(L instanceof Matrix) || !(B instanceof Matrix))
+		return error("BackSubstitution Error: Expecting 2 matrices");
+	if(L.size.n!=B.size.m)
+		return error("BackSubstitution Error: B and L size mismatch");
+	
+	
+	var X = new Matrix(B.size.m,B.size.n,0);
+	
+	for(var j = 1; j<=B.size.n; j++){
+		//for Each in row of B
+		for(var i = 1; i<= B.size.m; i++){
+			X.set(i,j,B.get(i,j));
+			for(var k = 1; k<=i-1;k++)
+				X.set(i,j,X.get(i,j)-L.get(i,k)*X.get(k,j));	
+			X.set(i,j,X.get(i,j)/L.get(i,i));
+		}
+	}
+	
+	return X;
+
+}
+function inverse(A){
+	if(!(A instanceof Matrix))
+		return error("Only matrices can be decomposed");
+	if(A.size.n !== A.size.m)
+		return error("Decomposition error: Matrix must be square");
+		
+	a_decomposed = A.lu();
+	var Y = forwardSubstitution(a_decomposed.L,a_decomposed.P.times(new Identity(A.size.m)));
+	
+	return backSubstitution(a_decomposed.U,Y);
+}Oxymath.createMatrix = function(){return create(Matrix, arguments);};
 Oxymath.createVector = function(){return create(Vector, arguments);};
 Oxymath.createIdentity = function(){return create(Identity, arguments);};
 	

@@ -59,6 +59,6 @@ function print(obj){
 	default:
 		console.log(obj);	
 	}
-
+	return obj;
 };
 

@@ -24,7 +24,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 				if((vector instanceof Array) && vector.length){ //initializing from an array
 					
 					this.parent(vector.length, 1);
-					this.forEach(function(val,m){
+					this.forEach(function(m){
 						this.set(m,vector[m-1]);
 					});
 					return;  
@@ -104,7 +104,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		norm: function(){
 			var len = 0;
 			
-			this.forEach(function(val,m){
+			this.forEach(function(m){
 				len+=this.get(m)*this.get(m);
 			});
 			

@@ -32,8 +32,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 						//if arr is a matrix then copy from there
 						if(arr instanceof Matrix){
 							this.init(arr.size.m,arr.size.n);
-							this.forEach(function(val,m,n){
-								return arr.get(m,n);
+							this.forEach(function(m,n){
+								this.set(m,n, arr.get(m,n));
 							});
 							return;								
 						}
@@ -81,26 +81,66 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			
 		},
 		
+		/** Calculates determinant of the matrix
+		* @mathod det
+		* @return {number} Determinant value
+		*/
+		det:function(){
+			var lu_dec = this.lu();
+			var det = 1;
+			for( var i = 1; i <= this.size.m;i++)
+				det = det*lu_dec.L.get(i,i);
+			return det*lu_dec.signum;
+		},	
 		
 		/**
-		* Sets new value for the each matrix element equal to the value that parameter function returns
+		* Exchanges rows of the matrix
+		* @method exchangeRows
+		* @param {number} i Row number
+		* @param {number} j Row number
+		* @return {Object} Reference to the current matrix
+		*/
+		exchangeRows:function(i,j){
+			if(i>this.size.m || j>this.size.m || i<1 || j<1)
+				return error("Wrong indices during the row exchange");
+			var tmp = this._private._storage[i-1];
+			this._private._storage[i-1]=this._private._storage[j-1];
+			this._private._storage[j-1]=tmp;
+			
+			return this;
+		}, 
+		
+		/**
+		* Executes function on each matrix element and passing indices as params
 		* @method forEach
-		* @param {function} fn Expects function as follows function(value, index_m, index_n){return new_value};
+		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
 		* @return {Object} Reference to the matrix
 		*/
 		forEach:function(fn){
 			for(var m=0;m<this.size.m;m++)
-				for (var n=0;n<this.size.n;n++)
-					//this._private._storage[m][n] = 
-					try {
-						fn.call(this,this._private._storage[m][n],m+1,n+1); 
-					} catch(stop_execution){
-						if(stop_execution)
-							break;
-					}	
+				this.forEachInRow(m+1,fn)				
 			return this;
 		},
 		
+		/**
+		* Executes function on each row element and passing index as a param
+		* @method forEach
+		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
+		* @return {Object} Reference to the matrix
+		*/
+		forEachInRow: function(row_number, fn){
+			
+			for (var n=0;n<this.size.n;n++)
+				//this._private._storage[m][n] = 
+				try {
+					fn.call(this,row_number,n+1); 
+				} catch(stop_execution){
+					if(stop_execution)
+						break;
+				}	
+				
+			return this;
+		},
 		
 		/**
 		* Retrievs the value of the particular matrix element
@@ -114,6 +154,15 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		},
 		
 		/**
+		* Inverse of the matrix
+		* @method inv
+		* @return Inverse of the matrix
+		*/
+		inv:function(){
+			return inverse(this);
+		},
+		
+		/**
 		* Checks if parameter-matrix has the same values as the current one
 		* @method isEqual
 		* @param {Matrix} matrix Matrix to compare to
@@ -124,7 +173,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return false;
 			
 			var equal = true;
-			this.forEach(function(val,m,n){
+			this.forEach(function(m,n){
 				if(this.get(m,n)!=matrix(m,n)){
 					equal = false;
 					throw true;	
@@ -144,6 +193,19 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			if(matrix instanceof Matrix)
 				return this.size.m === matrix.size.m && this.size.n === matrix.size.n;
 			else return false;
+		},
+		
+		/**
+		* PA = LU Decomosition. Returns object with the next members
+		* P Permutation matrix
+		* L Lower triangular
+		* U Upper triangular
+		* signum - It has the value (-1)^n, where n is the number of interchanges in the permutation.
+		* @method lu
+		* @return {Matrix} object containing L,U and P matrices;
+		*/
+		lu:function(){
+			return luCrout(this);
 		},
 		
 		/**
@@ -177,9 +239,12 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		* @param {numeric} index_m m index
 		* @param {numeric} index_n n index
 		* @param value New value for the element
+		* @return {Object} Reference to the matrix
 		*/
 		set: function(index_m, index_n, value){
 			this._private._storage[index_m-1][index_n-1] = value;
+			
+			return this;
 		},
 				
 		/**
@@ -191,7 +256,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		times: function(multiplier){
 			var A = this;
 			if(typeof multiplier === "number")
-				return (new Matrix(this.size.m,this.size.n)).forEach(function(value,m,n){this.set(m,n,multiplier*A.get(m,n));});
+				return (new Matrix(this.size.m,this.size.n)).forEach(function(m,n){this.set(m,n,multiplier*A.get(m,n));});
 				
 			if(multiplier instanceof Matrix){
 				return naiveMatrixMultiplication(A,multiplier);
@@ -206,7 +271,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		*/
 		transpose: function(){
 			var A=this;
-			return (new Matrix(this.size.n,this.size.m)).forEach(function(value,m,n){this.set(m,n,A.get(n,m));});
+			return (new Matrix(this.size.n,this.size.m)).forEach(function(m,n){this.set(m,n,A.get(n,m));});
 		},
 		
 		/**
@@ -221,8 +286,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return this.error("Matrix subtraction error: Matrices have different size");
 			};
 			
-			return A.forEach(function(val,m,n){
-				this.set(m,n,val-B.get(m,n)); 
+			return A.forEach(function(m,n){
+				this.set(m,n,A.get(m,n)-B.get(m,n)); 
 			});
 			return A;
 		},
@@ -239,8 +304,8 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 				return this.error("Matrix addition error: Matrices have different size");
 			};
 			
-			return A.forEach(function(val,m,n){
-				this.set(m,n,val+B.get(m,n)); 
+			return A.forEach(function(m,n){
+				this.set(m,n,A.get(m,n)+B.get(m,n)); 
 			});
 			return A;
 		}
@@ -265,7 +330,7 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 		if(!this._private._initialized){
 			if(m>0){
 				this.parent(m,m);
-				this.forEach(function(val,m,n){
+				this.forEach(function(m,n){
 					this.set(m,n,m===n?1:0);
 				});	
 			}else this.error("Error initializing identity matrix",m);
