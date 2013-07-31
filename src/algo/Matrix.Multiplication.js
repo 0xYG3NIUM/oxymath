@@ -1,4 +1,4 @@
-/** 
+/* 
 * Naive matrix multiplication
 * @private
 * @method naiveMatrixMultiplication
@@ -9,9 +9,9 @@
 */
 function naiveMatrixMultiplication(A,B){
 	if(!(A instanceof Matrix) || !(B instanceof Matrix))
-		error("Only matrices or Vectors can be multiplied");
+		throw new Error("Only matrices or Vectors can be multiplied", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(A.size.n !== B.size.m)
-		error("Multiplication error: Matrices size mismatch");
+		throw new Error("Multiplication error: Matrices size mismatch", ERROR_TYPE.DIMENSION_ERROR);
 	
 	var C = B instanceof Vector ? new Vector(A.size.m) : new Matrix(A.size.m, B.size.n)
 	

@@ -1,5 +1,5 @@
 /*!
- * Oxymath JavaScript Library v2.0.2
+ * Oxymath JavaScript Library v0.0.1
  * http://yurigolub.com/
  *
  * @author: Yuri Golub
@@ -21,7 +21,8 @@
 	
 	
 	var config = {
-		safe_mode:true
+		safe_mode:true,
+		tol: 0.000000000001 //Tolerance when comparing matrices
 	}
 	
 	
@@ -33,16 +34,51 @@
 	 */
 	function Oxymath() {};	
 	
-	/*
-	* Internal parent object of the library
-	* All objects are childs of it.
+	
+	/**
+	* Reference to the ERROR_TYPE object, see source code to find out supported error types
+	* @method ERROR_TYPE
 	*/
+	var ERROR_TYPE = Oxymath.ERROR_TYPE = {
+		DIMENSION_ERROR:0,
+		OBJECT_TYPE_MISMATCH:1,
+		RANGE_ERROR: 2,
+		UNDEFINED: 100
+	};
+	
+	/**
+	* Error class constructor function
+	* @private
+	* @method Error
+	* @param {string} error_message Error message 
+	* @param {ErrorType} error_type See ERROR_TYPE_OBJECT
+	* @param debug_info Optional debug info.
+	*/
+	var Error = Oxymath.Error = function(message, type, info){
+		this.error_message = message;
+		this.error_type    = type;
+		this.debug_info	   = info;
+	};
+	
+	
+	
+	
+	/**
+	* Internal parent object of the library, not accessible from outside. All objects are inherited from it.
+	* @class _Oxymath
+	* @constructor
+	*/
+	
 	function _Oxymath(){
 	};
 	
 	
-	/*
+	/**
 	* This function is used to create objects without calling 'new' operator
+	* @private
+	* @method create
+	* @param {function} constructor_function Function - constructor of an object
+	* @param {Array} args Array containing arguments
 	*/
 	var create = _Oxymath.prototype.create = function(constructor_function, args){
 		function f(){
@@ -53,19 +89,7 @@
 	}
 	
 	
-	/**
-	* Displays error messages
-	* @private
-	* @method error
-	* @param {string} message The massage to be printed
-	*/
-	var error = _Oxymath.prototype.error = function(message){
-		for(var i=1; i<arguments.length;i++){
-			console.log(arguments[i]);
-		}
-		alert(message);
-		return false;	
-	};
+
 	
 	/**
 	* Overloading function. Used internally to overload constructor methods
@@ -101,7 +125,7 @@
 	*/
 	_Oxymath.subClass = function _subClass(child){
 		
-		parent = this.prototype;
+		var parent = this.prototype;
 		
 	 	do_init = false;
 		var prototype = new this();

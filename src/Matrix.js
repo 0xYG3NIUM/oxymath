@@ -40,12 +40,12 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 					
 					
 						if(!(arr instanceof Array) || !arr.length || !(arr[0] instanceof Array) || !arr[0].length)
-							return this.error("Matrix initialization error: Array of Arrays expected",arr);
+							throw new Error("Matrix initialization error: Array of Arrays expected", ERROR_TYPE.OBJECT_TYPE_MISMATCH, arr);
 						
 						
 						for(var i=0;i<arr.length;i++){
 							if(!(arr[i] instanceof Array) || arr[i].length !== arr[0].length )
-								return error("Matrix initialization error: Rows have different sizes");
+								throw new Error("Matrix initialization error: Rows have different sizes", ERROR_TYPE.DIMENSION_ERROR);
 							storage.push(arr[i]); //Copying matrix to local storage
 						};							
 						
@@ -67,7 +67,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 									row[k]=init_value?init_value:0;		//Initializing new array with 0s 		
 								storage.push(row);
 							};
-						}else return error("Matrix initialization error: Wrong matrix size",m,n);
+						}else throw new Error("Matrix initialization error: Wrong matrix size", ERROR_TYPE.DIMENSION_ERROR, {m:m,n:n});
 					 });
 					
 					//Initializing from dimensions and fill with 0s
@@ -82,7 +82,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		},
 		
 		/** Calculates determinant of the matrix
-		* @mathod det
+		* @method det
 		* @return {number} Determinant value
 		*/
 		det:function(){
@@ -102,7 +102,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		*/
 		exchangeRows:function(i,j){
 			if(i>this.size.m || j>this.size.m || i<1 || j<1)
-				return error("Wrong indices during the row exchange");
+				throw new Error("Wrong indices during the row exchange", ERROR_TYPE.RANGE_ERROR);
 			var tmp = this._private._storage[i-1];
 			this._private._storage[i-1]=this._private._storage[j-1];
 			this._private._storage[j-1]=tmp;
@@ -124,7 +124,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		
 		/**
 		* Executes function on each row element and passing index as a param
-		* @method forEach
+		* @method forEachRow
 		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
 		* @return {Object} Reference to the matrix
 		*/
@@ -174,7 +174,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			
 			var equal = true;
 			this.forEach(function(m,n){
-				if(this.get(m,n)!=matrix(m,n)){
+				if(Math.abs(this.get(m,n)-matrix(m,n))>config.tol){ 
 					equal = false;
 					throw true;	
 				}
@@ -261,7 +261,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			if(multiplier instanceof Matrix){
 				return naiveMatrixMultiplication(A,multiplier);
 			}
-			return this.error("Matrix multiplication error");
+			throw new Error("Matrix multiplication error",ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 		},
 		
 		/**
@@ -283,7 +283,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		unsafeMinus: function(B){
 			var A = this;
 			if(!this.isSameSize(B)){
-				return this.error("Matrix subtraction error: Matrices have different size");
+				throw new Error("Matrix subtraction error: Matrices have different size", ERROR_TYPE.DIMENSION_ERROR);
 			};
 			
 			return A.forEach(function(m,n){
@@ -301,7 +301,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		unsafePlus: function(B){//Copy new result to self
 			var A = this;
 			if(!this.isSameSize(B)){
-				return this.error("Matrix addition error: Matrices have different size");
+				throw new Error("Matrix addition error: Matrices have different size", ERROR_TYPE.DIMENSION_ERROR);
 			};
 			
 			return A.forEach(function(m,n){
@@ -328,12 +328,12 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 	*/
 	init:function(m){
 		if(!this._private._initialized){
-			if(m>0){
+			if(typeof m === "numeric" && m){
 				this.parent(m,m);
 				this.forEach(function(m,n){
 					this.set(m,n,m===n?1:0);
 				});	
-			}else this.error("Error initializing identity matrix",m);
+			}else throw Error("Error initializing identity matrix",ERROR_TYPE.OBJECT_TYPE_MISMATCH,m);
 		};
 	}
 });

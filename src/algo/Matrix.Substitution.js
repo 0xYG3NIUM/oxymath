@@ -3,9 +3,9 @@
 
 function backSubstitution(U,B){
 	if(!(U instanceof Matrix) || !(B instanceof Matrix))
-		return error("BackSubstitution Error: Expecting 2 matrices");
+		throw new Error("BackSubstitution Error: Expecting 2 matrices", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(U.size.n!=B.size.m)
-		return error("BackSubstitution Error: B and U size mismatch");
+		throw new Error("BackSubstitution Error: B and U size mismatch", ERROR_TYPE.DIMENSION_ERROR);
 	
 	
 	var X = new Matrix(B.size.m,B.size.n,0);
@@ -31,10 +31,10 @@ function backSubstitution(U,B){
 //returns matrix X
 function forwardSubstitution(L,B){
 	if(!(L instanceof Matrix) || !(B instanceof Matrix))
-		return error("BackSubstitution Error: Expecting 2 matrices");
+		throw new Error("ForwardSubstitution Error: Expecting 2 matrices", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(L.size.n!=B.size.m)
-		return error("BackSubstitution Error: B and L size mismatch");
-	
+		throw new Error("ForwardSubstitution Error: B and U size mismatch", ERROR_TYPE.DIMENSION_ERROR);
+			
 	
 	var X = new Matrix(B.size.m,B.size.n,0);
 	

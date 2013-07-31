@@ -1,5 +1,5 @@
 /*!
- * Oxymath JavaScript Library v2.0.2
+ * Oxymath JavaScript Library v0.0.1
  * http://yurigolub.com/
  *
  * @author: Yuri Golub
@@ -21,7 +21,8 @@
 	
 	
 	var config = {
-		safe_mode:true
+		safe_mode:true,
+		tol: 0.000000000001 //Tolerance when comparing matrices
 	}
 	
 	
@@ -33,16 +34,51 @@
 	 */
 	function Oxymath() {};	
 	
-	/*
-	* Internal parent object of the library
-	* All objects are childs of it.
+	
+	/**
+	* Reference to the ERROR_TYPE object, see source code to find out supported error types
+	* @method ERROR_TYPE
 	*/
+	var ERROR_TYPE = Oxymath.ERROR_TYPE = {
+		DIMENSION_ERROR:0,
+		OBJECT_TYPE_MISMATCH:1,
+		RANGE_ERROR: 2,
+		UNDEFINED: 100
+	};
+	
+	/**
+	* Error class constructor function
+	* @private
+	* @method Error
+	* @param {string} error_message Error message 
+	* @param {ErrorType} error_type See ERROR_TYPE_OBJECT
+	* @param debug_info Optional debug info.
+	*/
+	var Error = Oxymath.Error = function(message, type, info){
+		this.error_message = message;
+		this.error_type    = type;
+		this.debug_info	   = info;
+	};
+	
+	
+	
+	
+	/**
+	* Internal parent object of the library, not accessible from outside. All objects are inherited from it.
+	* @class _Oxymath
+	* @constructor
+	*/
+	
 	function _Oxymath(){
 	};
 	
 	
-	/*
+	/**
 	* This function is used to create objects without calling 'new' operator
+	* @private
+	* @method create
+	* @param {function} constructor_function Function - constructor of an object
+	* @param {Array} args Array containing arguments
 	*/
 	var create = _Oxymath.prototype.create = function(constructor_function, args){
 		function f(){
@@ -53,19 +89,7 @@
 	}
 	
 	
-	/**
-	* Displays error messages
-	* @private
-	* @method error
-	* @param {string} message The massage to be printed
-	*/
-	var error = _Oxymath.prototype.error = function(message){
-		for(var i=1; i<arguments.length;i++){
-			console.log(arguments[i]);
-		}
-		alert(message);
-		return false;	
-	};
+
 	
 	/**
 	* Overloading function. Used internally to overload constructor methods
@@ -101,7 +125,7 @@
 	*/
 	_Oxymath.subClass = function _subClass(child){
 		
-		parent = this.prototype;
+		var parent = this.prototype;
 		
 	 	do_init = false;
 		var prototype = new this();
@@ -179,12 +203,12 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 					
 					
 						if(!(arr instanceof Array) || !arr.length || !(arr[0] instanceof Array) || !arr[0].length)
-							return this.error("Matrix initialization error: Array of Arrays expected",arr);
+							throw new Error("Matrix initialization error: Array of Arrays expected", ERROR_TYPE.OBJECT_TYPE_MISMATCH, arr);
 						
 						
 						for(var i=0;i<arr.length;i++){
 							if(!(arr[i] instanceof Array) || arr[i].length !== arr[0].length )
-								return error("Matrix initialization error: Rows have different sizes");
+								throw new Error("Matrix initialization error: Rows have different sizes", ERROR_TYPE.DIMENSION_ERROR);
 							storage.push(arr[i]); //Copying matrix to local storage
 						};							
 						
@@ -206,7 +230,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 									row[k]=init_value?init_value:0;		//Initializing new array with 0s 		
 								storage.push(row);
 							};
-						}else return error("Matrix initialization error: Wrong matrix size",m,n);
+						}else throw new Error("Matrix initialization error: Wrong matrix size", ERROR_TYPE.DIMENSION_ERROR, {m:m,n:n});
 					 });
 					
 					//Initializing from dimensions and fill with 0s
@@ -221,7 +245,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		},
 		
 		/** Calculates determinant of the matrix
-		* @mathod det
+		* @method det
 		* @return {number} Determinant value
 		*/
 		det:function(){
@@ -241,7 +265,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		*/
 		exchangeRows:function(i,j){
 			if(i>this.size.m || j>this.size.m || i<1 || j<1)
-				return error("Wrong indices during the row exchange");
+				throw new Error("Wrong indices during the row exchange", ERROR_TYPE.RANGE_ERROR);
 			var tmp = this._private._storage[i-1];
 			this._private._storage[i-1]=this._private._storage[j-1];
 			this._private._storage[j-1]=tmp;
@@ -263,7 +287,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		
 		/**
 		* Executes function on each row element and passing index as a param
-		* @method forEach
+		* @method forEachRow
 		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
 		* @return {Object} Reference to the matrix
 		*/
@@ -313,7 +337,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			
 			var equal = true;
 			this.forEach(function(m,n){
-				if(this.get(m,n)!=matrix(m,n)){
+				if(Math.abs(this.get(m,n)-matrix(m,n))>config.tol){ 
 					equal = false;
 					throw true;	
 				}
@@ -400,7 +424,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			if(multiplier instanceof Matrix){
 				return naiveMatrixMultiplication(A,multiplier);
 			}
-			return this.error("Matrix multiplication error");
+			throw new Error("Matrix multiplication error",ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 		},
 		
 		/**
@@ -422,7 +446,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		unsafeMinus: function(B){
 			var A = this;
 			if(!this.isSameSize(B)){
-				return this.error("Matrix subtraction error: Matrices have different size");
+				throw new Error("Matrix subtraction error: Matrices have different size", ERROR_TYPE.DIMENSION_ERROR);
 			};
 			
 			return A.forEach(function(m,n){
@@ -440,7 +464,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		unsafePlus: function(B){//Copy new result to self
 			var A = this;
 			if(!this.isSameSize(B)){
-				return this.error("Matrix addition error: Matrices have different size");
+				throw new Error("Matrix addition error: Matrices have different size", ERROR_TYPE.DIMENSION_ERROR);
 			};
 			
 			return A.forEach(function(m,n){
@@ -467,12 +491,12 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 	*/
 	init:function(m){
 		if(!this._private._initialized){
-			if(m>0){
+			if(typeof m === "numeric" && m){
 				this.parent(m,m);
 				this.forEach(function(m,n){
 					this.set(m,n,m===n?1:0);
 				});	
-			}else this.error("Error initializing identity matrix",m);
+			}else throw Error("Error initializing identity matrix",ERROR_TYPE.OBJECT_TYPE_MISMATCH,m);
 		};
 	}
 });
@@ -515,7 +539,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 					return;
 				}	
 					
-				return this.error("Vector initialization error: Array or Integer or Vector expected",vector);
+				throw new Error("Vector initialization error: Array or Integer or Vector expected", ERROR_TYPE.OBJECT_TYPE_MISMATCH, vector);
 			};
 		},
 		
@@ -529,7 +553,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		dotProduct:function(B){
 			var A = this;
 			if(!A.isSameSize(B))
-				return this.error("Vector dot product error: Vectors have different size");
+				throw new Error("Vector dot product error: Vectors have different size", ERROR_TYPE.DIMENSION_ERROR);
 			var product = 0;
 			
 			for(var m=1;m<=A.size();m++)
@@ -624,7 +648,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		}
 	
 	});
-/** 
+/* 
 * Naive matrix multiplication
 * @private
 * @method naiveMatrixMultiplication
@@ -635,9 +659,9 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 */
 function naiveMatrixMultiplication(A,B){
 	if(!(A instanceof Matrix) || !(B instanceof Matrix))
-		error("Only matrices or Vectors can be multiplied");
+		throw new Error("Only matrices or Vectors can be multiplied", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(A.size.n !== B.size.m)
-		error("Multiplication error: Matrices size mismatch");
+		throw new Error("Multiplication error: Matrices size mismatch", ERROR_TYPE.DIMENSION_ERROR);
 	
 	var C = B instanceof Vector ? new Vector(A.size.m) : new Matrix(A.size.m, B.size.n)
 	
@@ -656,9 +680,9 @@ function naiveMatrixMultiplication(A,B){
 function luCrout(A){
 
 	if(!(A instanceof Matrix))
-		return error("Only matrices can be decomposed");
+		throw new Error("Only matrices can be decomposed", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(A.size.n !== A.size.m)
-		return error("Decomposition error: Matrix must be square");
+		throw new Error("Decomposition error: Matrix must be square", ERROR_TYPE.DIMENSION_ERROR);
 	
 	var size = A.size.n
 	
@@ -682,7 +706,7 @@ function luCrout(A){
 				U.exchangeRows(i,max_index);
 				P.exchangeRows(i,max_index);
 				signum = signum * -1;
-			}else return error("Decomposition error: Matrix is singular");
+			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.UNDEFINED);
 			
 		}
 		
@@ -713,9 +737,9 @@ function luCrout(A){
 
 function backSubstitution(U,B){
 	if(!(U instanceof Matrix) || !(B instanceof Matrix))
-		return error("BackSubstitution Error: Expecting 2 matrices");
+		throw new Error("BackSubstitution Error: Expecting 2 matrices", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(U.size.n!=B.size.m)
-		return error("BackSubstitution Error: B and U size mismatch");
+		throw new Error("BackSubstitution Error: B and U size mismatch", ERROR_TYPE.DIMENSION_ERROR);
 	
 	
 	var X = new Matrix(B.size.m,B.size.n,0);
@@ -741,10 +765,10 @@ function backSubstitution(U,B){
 //returns matrix X
 function forwardSubstitution(L,B){
 	if(!(L instanceof Matrix) || !(B instanceof Matrix))
-		return error("BackSubstitution Error: Expecting 2 matrices");
+		throw new Error("ForwardSubstitution Error: Expecting 2 matrices", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(L.size.n!=B.size.m)
-		return error("BackSubstitution Error: B and L size mismatch");
-	
+		throw new Error("ForwardSubstitution Error: B and U size mismatch", ERROR_TYPE.DIMENSION_ERROR);
+			
 	
 	var X = new Matrix(B.size.m,B.size.n,0);
 	
@@ -763,21 +787,21 @@ function forwardSubstitution(L,B){
 }
 function inverse(A){
 	if(!(A instanceof Matrix))
-		return error("Only matrices can be decomposed");
+		throw new Error("Only matrices can be inverted", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(A.size.n !== A.size.m)
-		return error("Decomposition error: Matrix must be square");
+		throw new Error("Inverse error: Matrix must be square", ERROR_TYPE.DIMENSION_ERROR);
+	
 		
 	a_decomposed = A.lu();
 	var Y = forwardSubstitution(a_decomposed.L,a_decomposed.P.times(new Identity(A.size.m)));
 	
 	return backSubstitution(a_decomposed.U,Y);
-}Oxymath.createMatrix = function(){return create(Matrix, arguments);};
+}
+Oxymath.createMatrix = function(){return create(Matrix, arguments);};
 Oxymath.createVector = function(){return create(Vector, arguments);};
 Oxymath.createIdentity = function(){return create(Identity, arguments);};
 	
 })();
-
-
 
 //Shortcuts
 $M = Oxymath.createMatrix;

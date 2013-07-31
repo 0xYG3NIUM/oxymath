@@ -28,7 +28,7 @@ cd ..
 
 #creating documentation with YUIDOC
 echo 'Creating documentation...'
-yuidoc -t ./docs/simple -o ./docs/yuidoc ./build
+yuidoc -t ./docs/simple -o ./docs/yuidoc/ ./build
 
 
 if [ -f ./build/local.sh ];

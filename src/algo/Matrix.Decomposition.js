@@ -5,9 +5,9 @@
 function luCrout(A){
 
 	if(!(A instanceof Matrix))
-		return error("Only matrices can be decomposed");
+		throw new Error("Only matrices can be decomposed", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
 	if(A.size.n !== A.size.m)
-		return error("Decomposition error: Matrix must be square");
+		throw new Error("Decomposition error: Matrix must be square", ERROR_TYPE.DIMENSION_ERROR);
 	
 	var size = A.size.n
 	
@@ -31,7 +31,7 @@ function luCrout(A){
 				U.exchangeRows(i,max_index);
 				P.exchangeRows(i,max_index);
 				signum = signum * -1;
-			}else return error("Decomposition error: Matrix is singular");
+			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.UNDEFINED);
 			
 		}
 		

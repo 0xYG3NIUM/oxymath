@@ -36,7 +36,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 					return;
 				}	
 					
-				return this.error("Vector initialization error: Array or Integer or Vector expected",vector);
+				throw new Error("Vector initialization error: Array or Integer or Vector expected", ERROR_TYPE.OBJECT_TYPE_MISMATCH, vector);
 			};
 		},
 		
@@ -50,7 +50,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		dotProduct:function(B){
 			var A = this;
 			if(!A.isSameSize(B))
-				return this.error("Vector dot product error: Vectors have different size");
+				throw new Error("Vector dot product error: Vectors have different size", ERROR_TYPE.DIMENSION_ERROR);
 			var product = 0;
 			
 			for(var m=1;m<=A.size();m++)
