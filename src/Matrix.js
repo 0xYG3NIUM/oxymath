@@ -174,7 +174,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 			
 			var equal = true;
 			this.forEach(function(m,n){
-				if(Math.abs(this.get(m,n)-matrix(m,n))>config.tol){ 
+				if(Math.abs(this.get(m,n)-matrix.get(m,n))>config.tol){ 
 					equal = false;
 					throw true;	
 				}

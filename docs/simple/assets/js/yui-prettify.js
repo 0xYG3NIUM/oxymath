@@ -5,7 +5,7 @@ YUI().use('node', function(Y) {
             var lis = c.all('ol li'),
                 l = 1;
             lis.each(function(n) {
-                n.prepend('<a name="LINENUM_' + l + '"></a>');
+                n.prepend('<a name="LINENUM_' + l + '" id="l'+l+'"></a>');
                 l++;
             });
         });
