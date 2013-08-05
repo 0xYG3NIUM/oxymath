@@ -328,7 +328,7 @@ var Identity = Oxymath.Identity = Matrix.subClass({
 	*/
 	init:function(m){
 		if(!this._private._initialized){
-			if(typeof m === "numeric" && m){
+			if(typeof m === "number" && m){
 				this.parent(m,m);
 				this.forEach(function(m,n){
 					this.set(m,n,m===n?1:0);
