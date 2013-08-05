@@ -42,7 +42,7 @@ A.set(1,1,4); //sets element's value to 4
 //$V is a shortcut for new Oxymath.Vector
 var a = $V([1,2,3,4,5]);
 
-norm(a); //vector length (not size)
+a.norm(); //vector length (not size)
 
 var b = $V([1,1,1,1,1]);
 
