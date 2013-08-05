@@ -1,7 +1,4 @@
 testSection("Matrix initialization", function(){	
-
-	
-	
 	//Correct initialization
 	
 	var array = [[1,2,3],
