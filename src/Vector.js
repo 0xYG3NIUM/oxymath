@@ -43,17 +43,17 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		
 		/** 
 		* Calculates dot product of the two vectors
-		* @method dotProduct
+		* @method dot
 		* @param {Vector} B Second vector
 		* @return {number} Dot product
 		*/
-		dotProduct:function(B){
+		dot:function(B){
 			var A = this;
 			if(!A.isSameSize(B))
 				throw new Error("Vector dot product error: Vectors have different size", ERROR_TYPE.DIMENSION_ERROR);
 			var product = 0;
 			
-			for(var m=1;m<=A.size();m++)
+			for(var m=1;m<=A.length();m++)
 				product+=A.get(m)*B.get(m);
 			
 			return product;
@@ -69,21 +69,7 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		*/
 		get: function(index_m){
 			return this.parent(index_m,1);
-		},
-		
-		
-		/**
-		* Checks if parameter-vector is the same size as the current one
-		* @method isSameSize
-		* @param {Vector} vector Vector to compare size to
-		* @return {boolean} Boolean
-		*/
-		isSameSize: function(vector){
-			if(vector instanceof Vector)
-				return this.size() === vector.size();
-			else return false;
-		},
-		
+		},		
 		
 		/**
 		* Subtracts parameter-vector from the vector and returns the result as a  new vector instance
@@ -137,10 +123,10 @@ var Vector = Oxymath.Vector = Matrix.subClass({
 		
 		/**
 		* Return the number of elements in the vector
-		* @method size
+		* @method length
 		* @return {number} number of elements in the vector
 		*/
-		size: function(){
+		length: function(){
 			return this.size.m;
 		}
 	
