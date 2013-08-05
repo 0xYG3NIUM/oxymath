@@ -1,14 +1,12 @@
-oxymath
+Oxymath library
 =======
 
 Simple JS library for matrix and vector manipulations
 
-Documentation - http://www.yurigolub.com/oxymath_documentation/
-
-Developer version - http://raw.github.com/oxygenych/oxymath/master/build/oxymath.dev.js
-
-Production version(minimized) - http://raw.github.com/oxygenych/oxymath/master/oxymath.min.js
-<br><br><br>
+Documentation - http://www.yurigolub.com/oxymath_documentation/<br>
+Developer version - http://raw.github.com/oxygenych/oxymath/master/build/oxymath.dev.js<br>
+Production version(minimized) - http://raw.github.com/oxygenych/oxymath/master/oxymath.min.js<br>
+<br><br>
 <b>
 Code example:
 </b>
