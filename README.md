@@ -8,9 +8,10 @@ Documentation - http://www.yurigolub.com/oxymath_documentation/
 Developer version - http://raw.github.com/oxygenych/oxymath/master/build/oxymath.dev.js
 
 Production version(minimized) - http://raw.github.com/oxygenych/oxymath/master/oxymath.min.js
-
-
-Examples:
+<br><br><br>
+<b>
+Code example:
+</b>
 ```JavaScript
 
 //$M is a shortcut for 	new Oxymath.Matrix
