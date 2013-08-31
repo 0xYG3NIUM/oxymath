@@ -86,7 +86,15 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		* @return {number} Determinant value
 		*/
 		det:function(){
-			var lu_dec = this.lu();
+			
+			try{
+				var lu_dec = this.lu();
+			}catch(err){
+				if(err instanceof Error && err.error_type === ERROR_TYPE.ZERO_DETERMINANT)
+					return 0;
+				else throw(err);
+			};
+			
 			var det = 1;
 			for( var i = 1; i <= this.size.m;i++)
 				det = det*lu_dec.L.get(i,i);

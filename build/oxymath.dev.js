@@ -42,8 +42,9 @@
 	var ERROR_TYPE = Oxymath.ERROR_TYPE = {
 		DIMENSION_ERROR:0,
 		OBJECT_TYPE_MISMATCH:1,
-		RANGE_ERROR: 2,
-		UNDEFINED: 100
+		RANGE_ERROR:2,
+		ZERO_DETERMINANT:3,
+		UNDEFINED:100
 	};
 	
 	/**
@@ -249,7 +250,15 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		* @return {number} Determinant value
 		*/
 		det:function(){
-			var lu_dec = this.lu();
+			
+			try{
+				var lu_dec = this.lu();
+			}catch(err){
+				if(err instanceof Error && err.error_type === ERROR_TYPE.ZERO_DETERMINANT)
+					return 0;
+				else throw(err);
+			};
+			
 			var det = 1;
 			for( var i = 1; i <= this.size.m;i++)
 				det = det*lu_dec.L.get(i,i);
@@ -692,7 +701,7 @@ function luCrout(A){
 				U.exchangeRows(i,max_index);
 				P.exchangeRows(i,max_index);
 				signum = signum * -1;
-			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.UNDEFINED);
+			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.ZERO_DETERMINANT);
 			
 		}
 		

@@ -31,7 +31,7 @@ function luCrout(A){
 				U.exchangeRows(i,max_index);
 				P.exchangeRows(i,max_index);
 				signum = signum * -1;
-			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.UNDEFINED);
+			}else throw new Error("Decomposition error: Matrix is singular", ERROR_TYPE.ZERO_DETERMINANT);
 			
 		}
 		
