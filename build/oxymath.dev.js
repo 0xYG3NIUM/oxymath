@@ -682,10 +682,10 @@ function luCrout(A){
 	var size = A.size.n
 	
 	
-	P = new Identity(size);
-	L = new Identity(size);
-	U = new Matrix(A);
-	signum=1; //(-1)^n where n - number of permutations
+	var P = new Identity(size);
+	var L = new Identity(size);
+	var U = new Matrix(A);
+	var signum=1; //(-1)^n where n - number of permutations
 	
 	for(var i = 1; i <= size; i++){
 	
@@ -727,7 +727,8 @@ function luCrout(A){
 		signum:signum
 	};
 
-}//Back substitution when the input is in form UX=B 
+};
+//Back substitution when the input is in form UX=B 
 //returns matrix X
 
 function backSubstitution(U,B){
@@ -753,8 +754,7 @@ function backSubstitution(U,B){
 	
 	return X;
 
-}
-
+};
 
 //Back substitution when the input is in form LX=B 
 //returns matrix X
@@ -779,7 +779,8 @@ function forwardSubstitution(L,B){
 	
 	return X;
 
-}
+};
+
 function inverse(A){
 	if(!(A instanceof Matrix))
 		throw new Error("Only matrices can be inverted", ERROR_TYPE.OBJECT_TYPE_MISMATCH);
@@ -787,7 +788,7 @@ function inverse(A){
 		throw new Error("Inverse error: Matrix must be square", ERROR_TYPE.DIMENSION_ERROR);
 	
 		
-	a_decomposed = A.lu();
+	var a_decomposed = A.lu();
 	var Y = forwardSubstitution(a_decomposed.L,a_decomposed.P.times(new Identity(A.size.m)));
 	
 	return backSubstitution(a_decomposed.U,Y);

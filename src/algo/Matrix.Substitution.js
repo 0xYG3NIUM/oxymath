@@ -24,8 +24,7 @@ function backSubstitution(U,B){
 	
 	return X;
 
-}
-
+};
 
 //Back substitution when the input is in form LX=B 
 //returns matrix X
@@ -50,4 +49,5 @@ function forwardSubstitution(L,B){
 	
 	return X;
 
-}
+};
+

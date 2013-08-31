@@ -5,7 +5,7 @@ function inverse(A){
 		throw new Error("Inverse error: Matrix must be square", ERROR_TYPE.DIMENSION_ERROR);
 	
 		
-	a_decomposed = A.lu();
+	var a_decomposed = A.lu();
 	var Y = forwardSubstitution(a_decomposed.L,a_decomposed.P.times(new Identity(A.size.m)));
 	
 	return backSubstitution(a_decomposed.U,Y);

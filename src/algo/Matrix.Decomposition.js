@@ -12,10 +12,10 @@ function luCrout(A){
 	var size = A.size.n
 	
 	
-	P = new Identity(size);
-	L = new Identity(size);
-	U = new Matrix(A);
-	signum=1; //(-1)^n where n - number of permutations
+	var P = new Identity(size);
+	var L = new Identity(size);
+	var U = new Matrix(A);
+	var signum=1; //(-1)^n where n - number of permutations
 	
 	for(var i = 1; i <= size; i++){
 	
@@ -57,4 +57,4 @@ function luCrout(A){
 		signum:signum
 	};
 
-}
+};
