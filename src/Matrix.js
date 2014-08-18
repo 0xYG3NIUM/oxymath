@@ -131,7 +131,7 @@ var Matrix = Oxymath.Matrix = _Oxymath.subClass({
 		},
 		
 		/**
-		* Executes function on each row element and passing index as a param
+		* Executes function on each row element and passes index as a param
 		* @method forEachRow
 		* @param {function} fn Expects function as follows function(index_m, index_n){//your code};
 		* @return {Object} Reference to the matrix
